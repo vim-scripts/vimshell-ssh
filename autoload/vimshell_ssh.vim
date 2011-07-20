@@ -1,18 +1,19 @@
 function! vimshell_ssh#pre(input, context)
-  if a:input !~# '^vim\s'
+  if a:input !~# '^vim\>'
     return a:input
   endif
 
   "call vimshell#interactive#send_string("pwd\<Cr>")
   call b:interactive.process.write("pwd\<Cr>")
   let chunk = ''
-  while chunk == ''
+  while stridx(chunk, "\n") < 0
     let chunk = b:interactive.process.read(1000, 40)
     "sleep 1m
   endwhile
   let dir = split(chunk, "\n")[1]
   let dir = substitute(dir, "\r", '', '')
-  let file = substitute(a:input, '^vim\s\+', '', '')
+  let file = substitute(a:input, '^vim\s*', '', '')
+  echomsg file
 
   execute printf('new scp://%s//%s/%s', s:args2hostname(b:interactive.args), dir, file)
   wincmd W
